@@ -23,7 +23,13 @@ def detected_left_line():
 def not_detected_left_line():
     print("Keine Linie")
 
-linesensor_right.when_line = detected
-linesensor_right.when_no_line = not_detected
+linesensor_right.when_line = detected_right_line
+linesensor_right.when_no_line = not_detected_right_line
+
+linesensor_mid.when_line = detected_mid_line
+linesensor_mid.when_no_line = not_detected_mid_line
+
+linesensor_left.when_line = detected_left_line
+linesensor_left.when_no_line = not_detected_left_line
 
 sleep(3)
