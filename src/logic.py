@@ -1,6 +1,6 @@
 import motor
-import sensor
 import time
+import sensor
 
 motor.init()
 
@@ -38,7 +38,16 @@ def turn_left(turn_speed, turn_radius):
     motor.rear_left(left_wheel_speed)
     motor.rear_right(right_wheel_speed)
 
+def drive_straight(drive_speed, direction):
+    drive_speed_direction=0
+    if direction == "f":
+        drive_speed_direction = abs(drive_speed)
+    elif direction == "r":
+        drive_speed_direction = (-1)*abs(drive_speed)
+    else:
+        drive_speed_direction = 0
 
-
-time.sleep(3)
-stop_all_wheels()
+    motor.front_left(drive_speed_direction)
+    motor.front_right(drive_speed_direction)
+    motor.rear_left(drive_speed_direction)
+    motor.rear_right(drive_speed_direction)
