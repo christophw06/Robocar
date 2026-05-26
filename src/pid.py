@@ -1,29 +1,40 @@
-import sensor
+import threading
 import time
 
-def get_value_sensor_in_list(sensor_value, readin_timestep_in_ms, number_of_values_to_readin):
-    values=[]
-    number_of_values= len(values)
+import sensor
+
+sensor_values = []
+
+
+def get_value_sensor_in_list(
+    sensor_value_of_func, readin_timestep_in_ms, number_of_values_to_readin
+):
+    global sensor_values
     while True:
-        if sensor_value:
+        number_of_values = len(sensor_values)
+        if sensor_value_of_func:
             sensor_value_converted = 1
         else:
             sensor_value_converted = 0
 
         if number_of_values < number_of_values_to_readin:
-            values.append(sensor_value_converted)
-            time.sleep((readin_timestep_in_ms/number_of_values_to_readin)/100)
+            sensor_values.append(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
         elif number_of_values >= number_of_values_to_readin:
-            del values[0]
-            values.append(sensor_value_converted)
-            time.sleep((readin_timestep_in_ms/number_of_values_to_readin)/100)
+            del sensor_values[0]
+            sensor_values.append(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
 
-        return values
 
 
 def average_value(values_list):
-    number_to_divide= len(values_list)
-    average_value= sum(values_list)/number_to_divide
+    number_to_divide = len(values_list)
+    average_value = sum(values_list) / number_to_divide
+    print(average_value)
+    return average_value
 
-while True:
-    print = average_value(get_value_sensor_in_list(sensor.sensor_line("mid"), 200, 10))
+
+values_to_process = threading.Thread(args=(sensor.sensor_line("mid"), 200, 10))
+average_over_values = threading.Thread(args=(sensor_values))
+
+values_to_process.start()
