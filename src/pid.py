@@ -8,6 +8,10 @@ sensor_values_mid = queue.Queue()
 sensor_values_right = queue.Queue()
 sensor_values_left = queue.Queue()
 
+average_mid = 0
+average_right = 0
+average_left = 0
+
 
 def get_value_sensor_in_list_mid(
     sensor_function,
@@ -84,9 +88,15 @@ def get_value_sensor_in_list_left(
 def calc_average_value(values_list, orientation):
     while True:
         number_to_divide = values_list.qsize()
-        if number_to_divide > 0:
-            average_value = sum(list(values_list.queue)) / number_to_divide
-            print(str(average_value) + orientation)
+        if orientation == "right" and number_to_divide > 0:
+            global average_right
+            average_right = sum(list(values_list.queue)) / number_to_divide
+        elif orientation == "left" and number_to_divide > 0:
+            global average_left
+            average_left = sum(list(values_list.queue)) / number_to_divide
+        elif orientation == "mid" and number_to_divide > 0:
+            global average_mid
+            average_mid = sum(list(values_list.queue)) / number_to_divide
 
 
 values_to_process_mid = threading.Thread(
@@ -116,11 +126,12 @@ calculate_average_left = threading.Thread(
     target=calc_average_value, args=(sensor_values_left, "left")
 )
 
-values_to_process_mid.start()
-calculate_average_mid.start()
 
-values_to_process_right.start()
-calculate_average_right.start()
+# values_to_process_mid.start()
+# calculate_average_mid.start()
 
-values_to_process_left.start()
-calculate_average_left.start()
+# values_to_process_right.start()
+# calculate_average_right.start()
+
+# values_to_process_left.start()
+# calculate_average_left.start()
