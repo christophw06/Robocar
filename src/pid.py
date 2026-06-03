@@ -4,48 +4,123 @@ import time
 
 import sensor
 
-sensor_values = queue.Queue()
+sensor_values_mid = queue.Queue()
+sensor_values_right = queue.Queue()
+sensor_values_left = queue.Queue()
 
 
-def get_value_sensor_in_list(
+def get_value_sensor_in_list_mid(
     sensor_function,
-    sensor_orientation,
     readin_timestep_in_ms,
     number_of_values_to_readin,
 ):
-    global sensor_values
+    global sensor_values_mid
+
     while True:
-        sensor_value_of_func = sensor_function(sensor_orientation)
-        number_of_values = sensor_values.qsize()
+        sensor_value_of_func = sensor_function("mid")
+        number_of_values = sensor_values_mid.qsize()
         if sensor_value_of_func:
             sensor_value_converted = 1
         else:
             sensor_value_converted = 0
 
         if number_of_values < number_of_values_to_readin:
-            sensor_values.put(sensor_value_converted)
+            sensor_values_mid.put(sensor_value_converted)
             time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
         elif number_of_values >= number_of_values_to_readin:
-            sensor_values.get()
-            sensor_values.put(sensor_value_converted)
+            sensor_values_mid.get()
+            sensor_values_mid.put(sensor_value_converted)
             time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
 
 
-def calc_average_value(values_list):
+def get_value_sensor_in_list_right(
+    sensor_function,
+    readin_timestep_in_ms,
+    number_of_values_to_readin,
+):
+    global sensor_values_right
+
+    while True:
+        sensor_value_of_func = sensor_function("right")
+        number_of_values = sensor_values_right.qsize()
+        if sensor_value_of_func:
+            sensor_value_converted = 1
+        else:
+            sensor_value_converted = 0
+
+        if number_of_values < number_of_values_to_readin:
+            sensor_values_right.put(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
+        elif number_of_values >= number_of_values_to_readin:
+            sensor_values_right.get()
+            sensor_values_right.put(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
+
+
+def get_value_sensor_in_list_left(
+    sensor_function,
+    readin_timestep_in_ms,
+    number_of_values_to_readin,
+):
+    global sensor_values_left
+
+    while True:
+        sensor_value_of_func = sensor_function("left")
+        number_of_values = sensor_values_mid.qsize()
+        if sensor_value_of_func:
+            sensor_value_converted = 1
+        else:
+            sensor_value_converted = 0
+
+        if number_of_values < number_of_values_to_readin:
+            sensor_values_left.put(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
+        elif number_of_values >= number_of_values_to_readin:
+            sensor_values_left.get()
+            sensor_values_left.put(sensor_value_converted)
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
+
+
+def calc_average_value(values_list, orientation):
     while True:
         number_to_divide = values_list.qsize()
         if number_to_divide > 0:
             average_value = sum(list(values_list.queue)) / number_to_divide
-            print(average_value)
+            print(str(average_value) + orientation)
 
 
-values_to_process = threading.Thread(
-    target=get_value_sensor_in_list,
-    args=(sensor.sensor_line, "mid", 200, 10),
+values_to_process_mid = threading.Thread(
+    target=get_value_sensor_in_list_mid,
+    args=(sensor.sensor_line, 200, 10),
 )
 
-calculate_average = threading.Thread(target=calc_average_value, args=(sensor_values,))
+values_to_process_right = threading.Thread(
+    target=get_value_sensor_in_list_right,
+    args=(sensor.sensor_line, 200, 10),
+)
 
+values_to_process_left = threading.Thread(
+    target=get_value_sensor_in_list_left,
+    args=(sensor.sensor_line, 200, 10),
+)
 
-values_to_process.start()
-calculate_average.start()
+calculate_average_mid = threading.Thread(
+    target=calc_average_value, args=(sensor_values_mid, "mid")
+)
+
+calculate_average_right = threading.Thread(
+    target=calc_average_value, args=(sensor_values_right, "right")
+)
+
+calculate_average_left = threading.Thread(
+    target=calc_average_value, args=(sensor_values_left, "left")
+)
+
+values_to_process_mid.start()
+calculate_average_mid.start()
+
+values_to_process_right.start()
+calculate_average_right.start()
+
+values_to_process_left.start()
+calculate_average_left.start()
