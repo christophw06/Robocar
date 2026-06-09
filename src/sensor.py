@@ -1,3 +1,5 @@
+import json
+import os
 import queue
 import threading
 import time
@@ -11,6 +13,9 @@ linesensor_left = LineSensor(14)
 sensor_values_mid = queue.Queue()
 sensor_values_right = queue.Queue()
 sensor_values_left = queue.Queue()
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+path_json_file = os.path.join(base_dir, "config.json")
 
 
 def sensor_line(sensor_orientation):
@@ -55,7 +60,7 @@ def get_value_sensor_in_list_mid(
             time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
 
 
-"""def get_value_sensor_in_list_right(
+def get_value_sensor_in_list_right(
     sensor_function,
     readin_timestep_in_ms,
     number_of_values_to_readin,
@@ -76,7 +81,7 @@ def get_value_sensor_in_list_mid(
         elif number_of_values >= number_of_values_to_readin:
             sensor_values_right.get()
             sensor_values_right.put(sensor_value_converted)
-            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)"""
+            time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
 
 
 def get_value_sensor_in_list_left(
@@ -105,23 +110,35 @@ def get_value_sensor_in_list_left(
             time.sleep((readin_timestep_in_ms / number_of_values_to_readin) / 100)
 
 
+with open(path_json_file, "r") as config_file:
+    config_data = json.load(config_file)
+
+
 values_to_process_mid = threading.Thread(
     target=get_value_sensor_in_list_mid,
+    args=(
+        sensor_line,
+        config_data["sampling_rate_time"],
+        config_data["sampling_values"],
+    ),
+)
+
+values_to_process_right = threading.Thread(
+    target=get_value_sensor_in_list_right,
     args=(sensor_line, 10, 5),
 )
 
-"""values_to_process_right = threading.Thread(
-    target=get_value_sensor_in_list_right,
-    args=(sensor_line, 10, 5),
-)"""
-
 values_to_process_left = threading.Thread(
     target=get_value_sensor_in_list_left,
-    args=(sensor_line, 10, 5),
+    args=(
+        sensor_line,
+        config_data["sampling_rate_time"],
+        config_data["sampling_values"],
+    ),
 )
 
 values_to_process_mid.start()
 
-"""values_to_process_right.start()"""
+values_to_process_right.start()
 
 values_to_process_left.start()

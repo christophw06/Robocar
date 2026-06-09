@@ -32,7 +32,7 @@ def calculate_position():
     global position_of_line, average_left, average_mid
 
     while True:
-        position_value = (-1 * average_left) + (1 * average_mid)
+        position_value = (-1 * average_left) + (1 * average_right)
         position_of_line.put(position_value)
         # -1 line is left, 0 line ist middle, 1 line is right
 
@@ -56,14 +56,22 @@ def pid_drive(base_speed, kp, ki, kd):
 
 
 direction_calculation = threading.Thread(target=calculate_position)
-speed_setting = threading.Thread(target=pid_drive, args=(10, 30, 0.5, 5))
+speed_setting = threading.Thread(
+    target=pid_drive,
+    args=(
+        sensor.config_data["base_speed"],
+        sensor.config_data["proportional_faktor"],
+        sensor.config_data["integral_faktor"],
+        sensor.config_data["differential_faktor"],
+    ),
+)
 calculate_average_mid = threading.Thread(
     target=calc_average_value, args=(sensor.sensor_values_mid, "mid")
 )
 
-"""calculate_average_right = threading.Thread(
+calculate_average_right = threading.Thread(
     target=calc_average_value, args=(sensor.sensor_values_right, "right")
-)"""
+)
 
 calculate_average_left = threading.Thread(
     target=calc_average_value, args=(sensor.sensor_values_left, "left")
@@ -72,5 +80,5 @@ calculate_average_left = threading.Thread(
 direction_calculation.start()
 speed_setting.start()
 calculate_average_mid.start()
-"""calculate_average_right.start()"""
+calculate_average_right.start()
 calculate_average_left.start()
