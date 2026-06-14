@@ -1,6 +1,5 @@
-Hardware des Robocars
-
-Raspberry Pi
+Hardware des Robocars:
+Raspberry Pi 3
 PCA9685 PWM-Modul
 3x Liniensensoren
 4x DC-Motoren
